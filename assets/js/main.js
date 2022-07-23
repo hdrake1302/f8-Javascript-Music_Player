@@ -4,8 +4,8 @@
  * 3. Play / pause / seek *
  * 4. CD rotate *
  * 5. Next / prev *
- * 6. Random
- * 7. Next / Repeat when ended
+ * 6. Random *
+ * 7. Next / Repeat when ended *
  * 8. Active song
  * 9. Scroll active song into view
  * 10. Play song when click
@@ -31,9 +31,13 @@ const progress = $(".progress");
 const playBtn = $(".btn-toggle-play");
 const nextBtn = $(".btn-next");
 const prevBtn = $(".btn-prev");
+const randomBtn = $(".btn-random");
+const repeatBtn = $(".btn-repeat");
 
 const app = {
   isPlaying: false,
+  isRandom: false,
+  isRepeat: false,
   currentIndex: 0,
   songs: [
     {
@@ -105,6 +109,11 @@ const app = {
       player.classList.remove("playing");
     };
 
+    // Handle audio ended
+    audio.onended = function () {
+      nextBtn.click();
+    };
+
     function getProgressTime(audio) {
       // Function to get progress time from the audio
       let duration = audio.duration;
@@ -139,9 +148,17 @@ const app = {
 
     // Next feature
     nextBtn.onclick = function (e) {
-      if (_this.currentIndex < _this.songs.length - 1) {
+      let randomIndex = Math.floor(Math.random() * _this.songs.length);
+
+      if (_this.isRepeat) {
+        // Repeat choice doing nothing to the current index
+      } else if (_this.isRandom) {
+        // Random choice
+        _this.currentIndex = randomIndex;
+      } else if (_this.currentIndex < _this.songs.length - 1) {
         _this.currentIndex++;
       } else {
+        // When the current song have reached the end
         _this.currentIndex = 0;
       }
       _this.loadCurrentSong();
@@ -149,12 +166,39 @@ const app = {
 
     // Next feature
     prevBtn.onclick = function (e) {
-      _this.currentIndex =
-        _this.currentIndex > 0
-          ? _this.currentIndex - 1
-          : _this.songs.length - 1;
+      let randomIndex = Math.floor(Math.random() * _this.songs.length);
+
+      if (_this.isRandom) {
+        // Random choice
+        _this.currentIndex = randomIndex;
+      } else {
+        _this.currentIndex =
+          _this.currentIndex > 0
+            ? _this.currentIndex - 1
+            : _this.songs.length - 1;
+      }
 
       _this.loadCurrentSong();
+    };
+
+    // Random feature
+    randomBtn.onclick = function () {
+      randomBtn.classList.toggle("active");
+      if (randomBtn.classList.contains("active")) {
+        _this.isRandom = true;
+      } else {
+        _this.isRandom = false;
+      }
+    };
+
+    // Repeat feature
+    repeatBtn.onclick = function () {
+      repeatBtn.classList.toggle("active");
+      if (repeatBtn.classList.contains("active")) {
+        _this.isRepeat = true;
+      } else {
+        _this.isRepeat = false;
+      }
     };
   },
   render: function () {
