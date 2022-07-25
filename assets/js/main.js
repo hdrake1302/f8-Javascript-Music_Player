@@ -6,12 +6,12 @@
  * 5. Next / prev *
  * 6. Random *
  * 7. Next / Repeat when ended *
- * 8. Active song
- * 9. Scroll active song into view
- * 10. Play song when click
+ * 8. Active song *
+ * 9. Scroll active song into view *
+ * 10. Play song when click *
  * 11. Limit repeatition of songs
  * 12. Fix draging progress bar bugs. *
- * 13. Fix scroll into view bugs
+ * 13. Fix scroll into view bugs *
  * 14. Save current songs when refresh
  * 15. Add adjusting volume features
  */
@@ -168,7 +168,8 @@ const app = {
     prevBtn.onclick = function (e) {
       let randomIndex = Math.floor(Math.random() * _this.songs.length);
 
-      if (_this.isRandom) {
+      if (_this.isRepeat) {
+      } else if (_this.isRandom) {
         // Random choice
         _this.currentIndex = randomIndex;
       } else {
@@ -200,13 +201,24 @@ const app = {
         _this.isRepeat = false;
       }
     };
+
+    // Active song
+    const songElements = $$(".song");
+    songElements.forEach((curr, idx) => {
+      curr.onclick = function () {
+        _this.currentIndex = parseInt(this.dataset.index);
+        _this.loadCurrentSong();
+      };
+    });
   },
   render: function () {
     // Render songs to the playlist
     let html = "";
     this.songs.forEach((song, idx) => {
       html += `
-            <div class="song" data-index="${idx}">
+            <div class="song ${
+              idx === this.currentIndex ? "active" : ""
+            }" data-index="${idx}">
             <div
                 class="thumb"
                 style="
@@ -226,6 +238,13 @@ const app = {
     playList.innerHTML = html;
   },
   loadCurrentSong: function () {
+    // Active song
+    let currentSongEle = $(`.song[data-index="${this.currentIndex}"]`);
+
+    $(".song.active").classList.remove("active");
+    currentSongEle.classList.add("active");
+
+    currentSongEle.scrollIntoView({ behavior: "smooth", block: "end" });
     // Render giao diện
     let song = this.songs[this.currentIndex];
 
@@ -238,11 +257,11 @@ const app = {
   start: function () {
     this.defineProperties();
 
-    this.handleEvents();
-
     this.render();
 
     this.loadCurrentSong();
+
+    this.handleEvents();
   },
 };
 
